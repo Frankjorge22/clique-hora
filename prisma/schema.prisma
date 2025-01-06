@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  cpf          BigInt      @id
+  nome_user    String      @map("nome_user") @db.VarChar(250)
+  email        String      @db.VarChar(100)
+  senha        String      @db.Char(6)
+  superuser    Boolean
+  agendamentos Agendamento[] @relation("UsuarioAgendamento")
+  reservasCriadas Agendamento[] @relation("UsuarioSuperuser")
+}
+
+model Agendamento {
+  cod_agendamento Int       @id @default(autoincrement())
+  cpf             BigInt
+  usuario         Usuario   @relation("UsuarioAgendamento", fields: [cpf], references: [cpf])
+  cod_quadra      Int
+  quadra          Quadra    @relation(fields: [cod_quadra], references: [cod_quadra])
+  data_agendamento DateTime @db.Date
+  hora_inicio      DateTime @db.Time
+  hora_fim         DateTime @db.Time
+  status           String   @db.VarChar(20)
+  superuser        BigInt
+  criadoPor        Usuario   @relation("UsuarioSuperuser", fields: [superuser], references: [cpf])
+}
+
+
+model Quadra {
+  cod_quadra  Int          @id
+  nome        String       @db.VarChar(50)
+  localizacao String       @db.VarChar(150)
+  agendamentos Agendamento[]
+}
+

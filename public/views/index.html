@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela de Login</title>
+</head>
+<style>
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: linear-gradient(45deg, blue, white);
+    margin: 0;
+}
+
+.container {
+    background-color: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #ffffff;
+}
+
+.input-group {
+    margin-bottom: 1.2rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+input:focus {
+    border-color: dodgerblue;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 25, 247, 0.5);
+}
+
+.btn-cadastro {
+    width: 100%;
+    padding: 10px;
+    background-color: blue;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 10px;
+    background-color: blue;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-solicitacao{
+    width: 100%;
+    padding: 10px;
+    background-color: blue;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-cadastro:hover {
+    background-color:dodgerblue;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 1rem;
+    color: #ffffff;
+}
+
+.login-link a {
+    color: dodgerblue;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+</style>
+<body>
+    <div class="container">
+        <form class="form-login" id="loginForm">
+            <h1>Login</h1>
+            <div id="error-message" style="color: red; display: none;">
+                Usuário não encontrado. Redirecionando para cadastro...
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Digite seu email" required>
+            </div>
+
+            <div class="input-group">
+                <label for="senha">Senha</label>
+                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+    </div>
+
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+
+        try {
+            const response = await fetch('http://localhost:5000/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
+
+            if (response.ok) {
+                // Usuário autenticado, redireciona para o calendário
+                window.location.href = "calendario.html";
+            } else {
+                // Usuário não encontrado, redireciona para o cadastro
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = "Usuário não encontrado. Redirecionando para cadastro...";
+
+                setTimeout(() => {
+                    window.location.href = "cadastro.html";
+                }, 5000);
+            }
+        } catch (error) {
+            console.error('Erro na autenticação:', error);
+            alert('Erro ao conectar ao servidor. Tente novamente mais tarde.');
+        }
+    });
+</script>
+
+</body>
+</html>
