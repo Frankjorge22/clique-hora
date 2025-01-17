@@ -4,20 +4,19 @@ const { body, validationResult } = require('express-validator');
 const app = express();
 const PORT = 5000;
 
-// Middleware
+
 app.use(express.json());
 
-// Rota inicial para teste
-app.get('/', (req, res) => {
+app.get('/', (res) => {
   res.send('Servidor funcionando corretamente!');
 });
 
-// Iniciar o servidor
+
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
-// Middleware para verificar se o usuário é autenticado
+
 const isAuthenticated = async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
@@ -37,7 +36,7 @@ const isAuthenticated = async (req, res, next) => {
     }
 };
 
-// Middleware para verificar se o usuário é superusuário
+
 const isSuperUser = (req, res, next) => {
     if (!req.user || !req.user.superuser) {
         return res.status(403).json({ error: 'Acesso negado: somente superusuários podem realizar esta ação.' });
@@ -53,7 +52,7 @@ app.get('/usuarios', async (req, res) => {
   try {
     const usuarios = await prisma.usuario.findMany();
 
-    // Converter BigInt para string em cada usuário
+
     const usuariosFormatados = usuarios.map((usuario) => ({
       ...usuario,
       cpf: usuario.cpf.toString(),
@@ -74,7 +73,7 @@ app.post('/usuarios', async (req, res) => {
       data: { cpf: BigInt(cpf), nome_user, email, senha, superuser },
     });
 
-    // Converter os campos BigInt para string na resposta
+
     res.status(201).json({
       ...novoUsuario,
       cpf: novoUsuario.cpf.toString(),
@@ -91,10 +90,10 @@ app.put('/usuarios/:cpf', async (req, res) => {
   const { nome_user, email, senha, superuser } = req.body;
 
   try {
-    // Converte o CPF para BigInt
+    
     const cpfBigInt = BigInt(cpf);
 
-    // Verifica se o usuário existe antes de atualizar
+
     const usuarioExistente = await prisma.usuario.findUnique({
       where: { cpf: cpfBigInt },
     });
@@ -103,7 +102,7 @@ app.put('/usuarios/:cpf', async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' });
     }
 
-    // Atualiza o usuário
+
     const usuarioAtualizado = await prisma.usuario.update({
       where: { cpf: cpfBigInt },
       data: {
@@ -114,7 +113,7 @@ app.put('/usuarios/:cpf', async (req, res) => {
       },
     });
 
-    // Retorna o usuário atualizado
+
     res.status(200).json({
       ...usuarioAtualizado,
       cpf: usuarioAtualizado.cpf.toString(),
@@ -128,10 +127,10 @@ app.put('/usuarios/:cpf', async (req, res) => {
 app.delete('/usuarios/:cpf', async (req, res) => {
   const { cpf } = req.params;
   try {
-    // Converte o CPF para BigInt
+    
     const cpfBigInt = BigInt(cpf);
 
-    // Verifica se o usuário existe antes de deletar
+
     const usuarioExistente = await prisma.usuario.findUnique({
       where: { cpf: cpfBigInt },
     });
@@ -152,7 +151,7 @@ app.delete('/usuarios/:cpf', async (req, res) => {
   }
 });
 
-// Rota para listar todas as quadras
+
 app.get('/quadras', async (req, res) => {
   try {
     const quadras = await prisma.quadra.findMany();
@@ -162,7 +161,7 @@ app.get('/quadras', async (req, res) => {
   }
 });
 
-// Rota para criar uma nova quadra
+
 app.post('/quadras', async (req, res) => {
   const { cod_quadra, nome, localizacao } = req.body;
   try {
@@ -175,7 +174,7 @@ app.post('/quadras', async (req, res) => {
   }
 });
 
-// Rota para atualizar uma quadra existente
+
 app.put('/quadras/:cod_quadra', async (req, res) => {
   const { cod_quadra } = req.params;
   const { nome, localizacao } = req.body;
@@ -190,7 +189,7 @@ app.put('/quadras/:cod_quadra', async (req, res) => {
   }
 });
 
-// Rota para deletar uma quadra
+
 app.delete('/quadras/:cod_quadra', async (req, res) => {
   const { cod_quadra } = req.params;
   try {
@@ -214,7 +213,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rota para listar todos os agendamentos
+
 app.get('/agendamentos', async (req, res) => {
   try {
     const agendamentos = await prisma.agendamento.findMany({
@@ -224,14 +223,14 @@ app.get('/agendamentos', async (req, res) => {
       },
     });
 
-    res.status(200).json(agendamentos); // Middleware cuida da serialização
+    res.status(200).json(agendamentos); 
   } catch (error) {
     console.error('Erro ao listar agendamentos:', error);
     res.status(500).json({ error: 'Erro ao listar agendamentos' });
   }
 });
 
-// Rota para listar por id os agendamentos
+
 app.get('/agendamentos/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -248,7 +247,7 @@ app.get('/agendamentos/:id', async (req, res) => {
       return res.status(404).json({ error: 'Agendamento não encontrado' });
     }
 
-    // Convertendo BigInt para string
+
     const agendamentoFormatado = {
       ...agendamento,
       cpf: agendamento.cpf.toString(),
@@ -262,7 +261,7 @@ app.get('/agendamentos/:id', async (req, res) => {
   }
 });
 
-// Consultar agendamentos por data
+
 app.get('/agendamentos/data/:data', async (req, res) => {
   const { data } = req.params;
   const agendamentos = await prisma.agendamento.findMany({
@@ -273,7 +272,7 @@ app.get('/agendamentos/data/:data', async (req, res) => {
   res.json(agendamentos);
 });
 
-// Consultar agendamentos por quadra
+
 app.get('/agendamentos/quadra/:cod_quadra', async (req, res) => {
   const { cod_quadra } = req.params;
   const agendamentos = await prisma.agendamento.findMany({
@@ -288,7 +287,7 @@ app.get('/agendamentos/quadra/:cod_quadra', async (req, res) => {
 
 app.use(express.json());
 
-// Middleware para verificar se o usuário é superusuário
+
 const verificarSuperusuario = async (req, res, next) => {
   const { superuser } = req.body;
 
@@ -301,14 +300,14 @@ const verificarSuperusuario = async (req, res, next) => {
       return res.status(403).json({ error: 'Ação permitida apenas para superusuários.' });
     }
 
-    next(); // Permite continuar para a próxima etapa
+    next(); 
   } catch (error) {
     console.error('Erro ao verificar superusuário:', error);
     res.status(500).json({ error: 'Erro interno ao verificar superusuário' });
   }
 };
 
-// Rota para criar agendamentos
+
 app.post('/agendamentos', [
   body('cpf').isInt().withMessage('CPF deve ser um número inteiro'),
   body('cod_quadra').isInt().withMessage('Código da quadra deve ser um número inteiro'),
@@ -325,7 +324,7 @@ app.post('/agendamentos', [
   const { cpf, cod_quadra, data_agendamento, hora_inicio, hora_fim, superuser } = req.body;
 
   try {
-    // Validação de chave estrangeira
+   
     const usuarioExistente = await prisma.usuario.findUnique({ where: { cpf: BigInt(cpf) } });
     if (!usuarioExistente) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -341,7 +340,7 @@ app.post('/agendamentos', [
       return res.status(404).json({ error: 'Superuser não encontrado' });
     }
 
-    // Validação de horário
+
     const horaInicioDate = new Date(`${data_agendamento}T${hora_inicio}`);
     const horaFimDate = new Date(`${data_agendamento}T${hora_fim}`);
     if (horaInicioDate >= horaFimDate) {
@@ -350,7 +349,7 @@ app.post('/agendamentos', [
       });
     }
 
-    // Criar agendamento
+
     const novoAgendamento = await prisma.agendamento.create({
       data: {
         cpf: BigInt(cpf),
@@ -370,13 +369,13 @@ app.post('/agendamentos', [
   }
 });
 
-// Rota para atualizar status do agendamento (apenas superusuários)
+
 app.put('/agendamentos/:id/status', verificarSuperusuario, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
   try {
-    // Atualiza o status do agendamento
+    
     const agendamentoAtualizado = await prisma.agendamento.update({
       where: { cod_agendamento: parseInt(id, 10) },
       data: { status },
@@ -390,7 +389,7 @@ app.put('/agendamentos/:id/status', verificarSuperusuario, async (req, res) => {
 });
 
 
-// Rota para atualizar status do agendamento (apenas superusuários)
+
 app.put('/agendamentos/:id', [
   body('status').isIn(['pendente', 'confirmado', 'cancelado']).withMessage('Status inválido'),
 ], async (req, res) => {
@@ -401,10 +400,10 @@ app.put('/agendamentos/:id', [
 
   const { id } = req.params;
   const { status } = req.body;
-  const superuserCpf = req.body.superuserCpf; // CPF do superusuário realizando a operação
+  const superuserCpf = req.body.superuserCpf; 
 
   try {
-    // Validação se o usuário é superusuário
+
     const superuser = await prisma.usuario.findUnique({
       where: { cpf: BigInt(superuserCpf) },
     });
@@ -413,7 +412,7 @@ app.put('/agendamentos/:id', [
       return res.status(403).json({ error: 'Acesso negado. Apenas superusuários podem alterar o status.' });
     }
 
-    // Verificar se o agendamento existe
+  
     const agendamento = await prisma.agendamento.findUnique({
       where: { cod_agendamento: parseInt(id) },
     });
@@ -422,7 +421,7 @@ app.put('/agendamentos/:id', [
       return res.status(404).json({ error: 'Agendamento não encontrado.' });
     }
 
-    // Atualizar status e CPF do superusuário
+
     const agendamentoAtualizado = await prisma.agendamento.update({
       where: { cod_agendamento: parseInt(id) },
       data: {
@@ -438,7 +437,7 @@ app.put('/agendamentos/:id', [
   }
 });
 
-// Rota para atualizar status do agendamento (apenas superusuários)
+
 app.put('/agendamentos/cancelar/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -453,7 +452,7 @@ app.put('/agendamentos/cancelar/:id', async (req, res) => {
   }
 });
 
-// Rota para deletar um agendamento
+
 app.delete('/agendamentos/:cod_agendamento', async (req, res) => {
   const { cod_agendamento } = req.params;
   try {
@@ -465,7 +464,8 @@ app.delete('/agendamentos/:cod_agendamento', async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar agendamento' });
   }
 });
-// Rota para cancelar um agendamento
+
+
 app.put('/agendamentos/cancelar/:id', async (req, res) => {
   const { id } = req.params;
   try {
